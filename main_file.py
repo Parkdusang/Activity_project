@@ -69,7 +69,7 @@ with tf.Session() as sess:
         sess.run(optimizer, feed_dict={X: x_data, Y: y_data})
         if step % 200 == 0:
             feed = {X: x_data, Y: y_data}
-            print  step ,sess.run(cost , feed_dict={X:x_data , Y:y_data})
+            print  (step ,sess.run(cost , feed_dict={X:x_data , Y:y_data}))
 
     print('-------------------------------')
 
