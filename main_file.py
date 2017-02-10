@@ -18,6 +18,9 @@ def xavier_init(n_inputs, n_outputs, uniform=True):
 
 
 learning_rate = 0.001
+dropout_rate = tf.placeholder("float")
+
+
 
 xy = np.loadtxt('training.txt', unpack=True, dtype='float32')
 testset = np.loadtxt('testAccuracy.txt', unpack=True, dtype='float32')
@@ -44,19 +47,29 @@ Y = tf.placeholder("float", [None, 3])
 W1 = tf.get_variable("W1", shape=[6, 12], initializer=xavier_init(6, 12))
 W2 = tf.get_variable("W2", shape=[12, 12], initializer=xavier_init(12, 12))
 W3 = tf.get_variable("W3", shape=[12, 12], initializer=xavier_init(12, 12))
-W4 = tf.get_variable("W4", shape=[12, 3], initializer=xavier_init(12, 3))
-
+W4 = tf.get_variable("W4", shape=[12, 12], initializer=xavier_init(12, 12))
+W5 = tf.get_variable("W5", shape=[12, 3], initializer=xavier_init(12, 3))
 
 B1 = tf.Variable(tf.random_normal([12]))
 B2 = tf.Variable(tf.random_normal([12]))
 B3 = tf.Variable(tf.random_normal([12]))
-B4 = tf.Variable(tf.random_normal([3]))
+B4 = tf.Variable(tf.random_normal([12]))
+B5 = tf.Variable(tf.random_normal([3]))
+
+# _L1 = tf.nn.relu(tf.add(tf.matmul(X,W1),B1))
+# L1 = tf.nn.dropout(_L1, dropout_rate)
+# _L2 = tf.nn.relu(tf.add(tf.matmul(L1, W2),B2)) # Hidden layer with ReLU activation
+# L2 = tf.nn.dropout(_L2, dropout_rate)
+# _L3 = tf.nn.relu(tf.add(tf.matmul(L2, W3),B3)) # Hidden layer with ReLU activation
+# L3 = tf.nn.dropout(_L3, dropout_rate)
+# _L4 = tf.nn.relu(tf.add(tf.matmul(L3, W4),B4)) # Hidden layer with ReLU activation
+# L4 = tf.nn.dropout(_L4, dropout_rate)
 
 L1 = tf.nn.relu(tf.add(tf.matmul(X, W1), B1))
 L2 = tf.nn.relu(tf.add(tf.matmul(L1, W2), B2)) # Hidden layer
 L3 = tf.nn.relu(tf.add(tf.matmul(L2, W3),B3)) # Hidden layer
-
-hypothesis = tf.add(tf.matmul(L3, W4), B4)
+L4 = tf.nn.relu(tf.add(tf.matmul(L2, W3),B3)) # Hidden layer
+hypothesis = tf.add(tf.matmul(L4, W5), B5)
 cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(hypothesis, Y))
 optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(cost)
 
@@ -67,9 +80,11 @@ with tf.Session() as sess:
 
     for step in range(20000):
         sess.run(optimizer, feed_dict={X: x_data, Y: y_data})
+        # sess.run(optimizer, feed_dict={X: x_data, Y: y_data, dropout_rate: 0.6})
         if step % 200 == 0:
             feed = {X: x_data, Y: y_data}
-            print  (step ,sess.run(cost , feed_dict={X:x_data , Y:y_data}))
+            print  step ,sess.run(cost , feed_dict={X:x_data , Y:y_data})
+            # print  step, sess.run(cost, feed_dict={X: x_data, Y: y_data, dropout_rate: 0.6})
 
     print('-------------------------------')
 
@@ -110,7 +125,7 @@ with tf.Session() as sess:
     # Calculate accuracy
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
     print("Accuracy:", accuracy.eval({X: test_x_data, Y: test_y_data}))
-
+    # print("Accuracy:", accuracy.eval({X: test_x_data, Y: test_y_data, dropout_rate: 1})) #drop out
 
     # a = sess.run(hypothesis, feed_dict={X: [[0.0815,0.7859, -0.3516, -0.0493, -0.0448, -0.0393]]})
     # print "a :", a, sess.run(tf.arg_max(a, 1))
