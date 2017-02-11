@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:orientation="vertical"
+    tools:context="com.example.parkdusang.activity_project.MainActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <TextView
+            android:id="@+id/accx"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="x :   " />
+        <TextView
+            android:id="@+id/accy"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="y :   " />
+        <TextView
+            android:id="@+id/accz"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="z :   " />
+        <TextView
+            android:id="@+id/gx"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="gx :   " />
+        <TextView
+            android:id="@+id/gy"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="gy :   " />
+        <TextView
+            android:id="@+id/gz"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="gz :   " />
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="걷기"/>
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="앉기"/>
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="누워있기"/>
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="걷기"/>
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="앉기"/>
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="누워있기"/>
+    </LinearLayout>
+
+</LinearLayout>
