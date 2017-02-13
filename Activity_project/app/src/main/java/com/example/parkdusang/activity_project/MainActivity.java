@@ -52,7 +52,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     InputStream is = null;
 
-    float save_pressure[] = new float[20];
+    float save_pressure[] = new float[16];
     float pre_avgPressure=0; // 이전의
     float vari_Pressure = 0; //변화량
     float total_sum =0;
@@ -117,10 +117,17 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     @Override
     protected void onPause(){
         super.onPause();
+        break_another_mode = false;
+        set_mode = 0;
+        start_Btn.setText("데이터 수집 시작!");
+        state.setText("수집모드 : 대기중");
+        vari_Pressure = 0;
+        pre_avgPressure = 0;
         sm.unregisterListener(this);
         sm.unregisterListener(this);
         sm.unregisterListener(this);
     }
+
 
 
 
@@ -166,19 +173,19 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 save_pressure[i] = sensorEvent.values[0];
                 i++;
 
-                if(i == 20){
+                if(i == 16){
                     i = 0;
-                    for(int j = 0 ; j<20 ; j++)
+                    for(int j = 0 ; j<16 ; j++)
                         total_sum += save_pressure[j];
                     if(pre_avgPressure == 0){
-                        air_pressure.setText("" + total_sum/20);
-                        pre_avgPressure = total_sum/20;
+                        air_pressure.setText("" + total_sum/16);
+                        pre_avgPressure = total_sum/16;
                         total_sum = 0;
                     }
                     else{
-                        air_pressure.setText("" + total_sum/20);
-                        vari_Pressure = pre_avgPressure - total_sum/20;
-                        pre_avgPressure = total_sum/20;
+                        air_pressure.setText("" + total_sum/16);
+                        vari_Pressure = pre_avgPressure - total_sum/16;
+                        pre_avgPressure = total_sum/16;
                         total_sum = 0;
                     }
 
@@ -258,7 +265,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     set_mode = 0;
                     start_Btn.setText("데이터 수집 시작!");
                     state.setText("수집모드 : 대기중");
-
+                    vari_Pressure = 0;
+                    pre_avgPressure = 0;
                     Toast.makeText(getApplicationContext(),"데이터 수집을 종료합니다. ",Toast.LENGTH_SHORT).show();
                 }
 
@@ -289,7 +297,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     PushData(url,RX,RY,RZ,RGX,RGY,RGZ,set_mode , (-1)*(vari_Pressure*100)*(vari_Pressure*100));
 
                 try {
-                    Thread.sleep(700);
+                    Thread.sleep(1000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
