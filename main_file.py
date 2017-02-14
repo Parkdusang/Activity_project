@@ -25,18 +25,18 @@ dropout_rate = tf.placeholder("float")
 xy = np.loadtxt('training.txt', unpack=True, dtype='float32')
 testset = np.loadtxt('testAccuracy.txt', unpack=True, dtype='float32')
 
-x_data = np.transpose(xy[0:6])
-y_data = np.transpose(xy[6:])
+x_data = np.transpose(xy[0:7])
+y_data = np.transpose(xy[7:])
 
 
-test_x_data = np.transpose(testset[0:6])
-test_y_data = np.transpose(testset[6:])
+test_x_data = np.transpose(testset[0:7])
+test_y_data = np.transpose(testset[7:])
 
 print('x_data :', x_data.shape)
 print('y_data :', y_data.shape)
 
-X = tf.placeholder("float", [None, 6])
-Y = tf.placeholder("float", [None, 3])
+X = tf.placeholder("float", [None, 7])
+Y = tf.placeholder("float", [None, 4])
 
 #W = tf.Variable(tf.zeros([8, 5]))
 #hypothesis = tf.nn.softmax(tf.matmul(X, W))
@@ -44,17 +44,17 @@ Y = tf.placeholder("float", [None, 3])
 #optimizer = tf.train.GradientDescentOptimizer(learning_rate).minimize(cost)
 
 
-W1 = tf.get_variable("W1", shape=[6, 12], initializer=xavier_init(6, 12))
-W2 = tf.get_variable("W2", shape=[12, 12], initializer=xavier_init(12, 12))
-W3 = tf.get_variable("W3", shape=[12, 12], initializer=xavier_init(12, 12))
-W4 = tf.get_variable("W4", shape=[12, 12], initializer=xavier_init(12, 12))
-W5 = tf.get_variable("W5", shape=[12, 3], initializer=xavier_init(12, 3))
+W1 = tf.get_variable("W1", shape=[7, 14], initializer=xavier_init(7, 14))
+W2 = tf.get_variable("W2", shape=[14, 14], initializer=xavier_init(14, 14))
+W3 = tf.get_variable("W3", shape=[14, 14], initializer=xavier_init(14, 14))
+W4 = tf.get_variable("W4", shape=[14, 14], initializer=xavier_init(14, 14))
+W5 = tf.get_variable("W5", shape=[14, 4], initializer=xavier_init(14, 4))
 
-B1 = tf.Variable(tf.random_normal([12]))
-B2 = tf.Variable(tf.random_normal([12]))
-B3 = tf.Variable(tf.random_normal([12]))
-B4 = tf.Variable(tf.random_normal([12]))
-B5 = tf.Variable(tf.random_normal([3]))
+B1 = tf.Variable(tf.random_normal([14]))
+B2 = tf.Variable(tf.random_normal([14]))
+B3 = tf.Variable(tf.random_normal([14]))
+B4 = tf.Variable(tf.random_normal([14]))
+B5 = tf.Variable(tf.random_normal([4]))
 
 # _L1 = tf.nn.relu(tf.add(tf.matmul(X,W1),B1))
 # L1 = tf.nn.dropout(_L1, dropout_rate)
@@ -69,7 +69,8 @@ L1 = tf.nn.relu(tf.add(tf.matmul(X, W1), B1))
 L2 = tf.nn.relu(tf.add(tf.matmul(L1, W2), B2)) # Hidden layer
 L3 = tf.nn.relu(tf.add(tf.matmul(L2, W3),B3)) # Hidden layer
 L4 = tf.nn.relu(tf.add(tf.matmul(L2, W3),B3)) # Hidden layer
-hypothesis = tf.add(tf.matmul(L4, W5), B5)
+hypothesis = tf.add(tf.matmul(L4, W5) , B5)
+
 cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(hypothesis, Y))
 optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(cost)
 
