@@ -56,6 +56,12 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="기압 :" />
+        <TextView
+            android:visibility="invisible"
+            android:id="@+id/realstate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="실시간 상태 :" />
     </LinearLayout>
 
     <LinearLayout
@@ -113,4 +119,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="데이터 수집 시작!"/>
+
+    <Button
+        android:id="@+id/realTimeTest"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="실시간 데이터 테스트!"/>
 </LinearLayout>

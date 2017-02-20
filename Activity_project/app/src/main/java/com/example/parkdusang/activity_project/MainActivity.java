@@ -41,14 +41,15 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     TextView tvGZ = null;
     TextView state = null;
     TextView air_pressure = null;
+    TextView real_STATE = null;
 
-    Button btn_run, btn_sitdown,btn_walk,btn_lie,btn_upstair,btn_downstair ,start_Btn;
+    Button btn_run, btn_sitdown,btn_walk,btn_lie,btn_upstair,btn_downstair ,start_Btn ,real_test;
 
     int set_mode =0 ,i=0;
 
-    Thread getActivityState;
+    Thread getActivityState,pustData;
 
-    Boolean break_another_mode=false;
+    Boolean break_another_mode=false, realTimeTest = false;
 
     InputStream is = null;
 
@@ -57,10 +58,12 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     float vari_Pressure = 0; //변화량
     float total_sum =0;
 
+    MultiLayer ML;
+
     String RX,RY,RZ,RGX,RGY,RGZ;
     String line = null;
     String url ="http://pesang72.cafe24.com/handisoft/handisoft_get_sensorData.php";
-
+    String url2 = "http://pesang72.cafe24.com/handisoft/real_time_data.php";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -75,7 +78,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         // 기압 센서
         pressSensor = sm.getDefaultSensor(Sensor.TYPE_PRESSURE);
 
-
+        ML = new MultiLayer();
         tvX = (TextView)findViewById(R.id.accx);
         tvY = (TextView)findViewById(R.id.accy);
         tvZ = (TextView)findViewById(R.id.accz);
@@ -84,6 +87,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         tvGZ = (TextView)findViewById(R.id.gz);
         state = (TextView)findViewById(R.id.now_state);
         air_pressure = (TextView)findViewById(R.id.air_press);
+        real_STATE = (TextView)findViewById(R.id.realstate);
+
+        real_STATE.setVisibility(View.INVISIBLE);
 
         btn_run = (Button)findViewById(R.id.activity_run); // 달리기
         btn_sitdown = (Button)findViewById(R.id.activity_sitdown); // 앉기
@@ -94,6 +100,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         start_Btn = (Button)findViewById(R.id.start_activity);
 
+        real_test = (Button)findViewById(R.id.realTimeTest);
+
         btn_run.setOnClickListener(this);
         btn_sitdown.setOnClickListener(this);
         btn_walk.setOnClickListener(this);
@@ -102,6 +110,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         btn_downstair.setOnClickListener(this);
 
         start_Btn.setOnClickListener(this);
+        real_test.setOnClickListener(this);
 
 
     }
@@ -126,6 +135,23 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         sm.unregisterListener(this);
         sm.unregisterListener(this);
         sm.unregisterListener(this);
+
+        if(realTimeTest){
+            pustData = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    // TODO Auto-generated method stub
+                    //pushRealData(0);
+
+                }
+            });
+            pustData.start();
+
+
+            realTimeTest = false;
+            real_test.setText("실시간 데이터 테스트!");
+        }
+        real_STATE.setVisibility(View.INVISIBLE);
     }
 
 
@@ -135,37 +161,37 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     public void onSensorChanged(SensorEvent sensorEvent) {
         switch (sensorEvent.sensor.getType()) {
             case Sensor.TYPE_ACCELEROMETER:
-                tvX.setText(String.valueOf(sensorEvent.values[0]));
-                tvY.setText(String.valueOf(sensorEvent.values[1]));
-                tvZ.setText(String.valueOf(sensorEvent.values[2]));
+                tvX.setText("X : "+String.valueOf(sensorEvent.values[0]));
+                tvY.setText("Y : "+String.valueOf(sensorEvent.values[1]));
+                tvZ.setText("Z : "+String.valueOf(sensorEvent.values[2]));
                 RX =String.valueOf(sensorEvent.values[0]);
                 RY =String.valueOf(sensorEvent.values[1]);
                 RZ =String.valueOf(sensorEvent.values[2]);
-                if(RX.length() >7 ){
+                if(RX.length() >7 && !RX.contains("E")){
                     RX = RX.substring(0,6);
                 }
-                if(RY.length() >7 ){
+                if(RY.length() >7 && !RY.contains("E")){
                     RY = RY.substring(0,6);
                 }
-                if(RZ.length() >7 ){
+                if(RZ.length() >7 && !RZ.contains("E")){
                     RZ = RZ.substring(0,6);
                 }
                 break;
             case Sensor.TYPE_GYROSCOPE:
-                tvGX.setText(String.valueOf(sensorEvent.values[0]));
-                tvGY.setText(String.valueOf(sensorEvent.values[1]));
-                tvGZ.setText(String.valueOf(sensorEvent.values[2]));
+                tvGX.setText("GX : "+String.valueOf(sensorEvent.values[0]));
+                tvGY.setText("GY : "+String.valueOf(sensorEvent.values[1]));
+                tvGZ.setText("GZ : "+String.valueOf(sensorEvent.values[2]));
 
                 RGX = String.valueOf(sensorEvent.values[0]);
-                if(RGX.length() >7 ){
+                if(RGX.length() >7 && !RGX.contains("E")){
                     RGX = RGX.substring(0,6);
                 }
                 RGY = String.valueOf(sensorEvent.values[1]);
-                if(RGY.length() >7 ){
+                if(RGY.length() >7 && !RGY.contains("E")){
                     RGY = RGY.substring(0,6);
                 }
                 RGZ = String.valueOf(sensorEvent.values[2]);
-                if(RGZ.length() >7 ){
+                if(RGZ.length() >7 && !RGZ.contains("E")){
                     RGZ = RGZ.substring(0,6);
                 }
                 break;
@@ -178,12 +204,12 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     for(int j = 0 ; j<16 ; j++)
                         total_sum += save_pressure[j];
                     if(pre_avgPressure == 0){
-                        air_pressure.setText("" + total_sum/16);
+                        air_pressure.setText("기압 : " + total_sum/16);
                         pre_avgPressure = total_sum/16;
                         total_sum = 0;
                     }
                     else{
-                        air_pressure.setText("" + total_sum/16);
+                        air_pressure.setText("기압 : " + total_sum/16);
                         vari_Pressure = pre_avgPressure - total_sum/16;
                         pre_avgPressure = total_sum/16;
                         total_sum = 0;
@@ -206,68 +232,117 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         switch (view.getId()){
             case R.id.activity_Towalk:
                 if(!break_another_mode) {
-                    set_mode = 1;
-                    state.setText("수집모드 : 걷기");
+                    if(!realTimeTest) {
+                        set_mode = 1;
+                        state.setText("수집모드 : 걷기");
+                    }
                 }
                 break;
             case R.id.activity_run:
                 if(!break_another_mode) {
-                    set_mode = 2;
-                    state.setText("수집모드 : 달리기");
+                    if(!realTimeTest) {
+                        set_mode = 2;
+                        state.setText("수집모드 : 달리기");
+                    }
 
                 }
                 break;
             case R.id.activity_sitdown:
                 if(!break_another_mode) {
-                    set_mode = 3;
-                    state.setText("수집모드 : 앉기");
+                    if(!realTimeTest) {
+                        set_mode = 3;
+                        state.setText("수집모드 : 앉기");
+                    }
                 }
                 break;
             case R.id.activity_lie:
                 if(!break_another_mode) {
-                    set_mode = 4;
-                    state.setText("수집모드 : 눕기");
+                    if(!realTimeTest) {
+                        set_mode = 4;
+                        state.setText("수집모드 : 눕기");
+                    }
                 }
                 break;
             case R.id.activity_Upstairs:
                 if(!break_another_mode){
-                    state.setText("수집모드 : 계단오르기");
-                    set_mode = 5;
+                    if(!realTimeTest) {
+                        state.setText("수집모드 : 계단오르기");
+                        set_mode = 5;
+                    }
                 }
                 break;
             case R.id.activity_Downstairs:
                 if(!break_another_mode) {
-                    state.setText("수집모드 : 계단 내려가기");
-                    set_mode = 6;
+                    if(!realTimeTest) {
+                        state.setText("수집모드 : 계단 내려가기");
+                        set_mode = 6;
+                    }
+                }
+                break;
+            case R.id.realTimeTest:
+                if(!realTimeTest) {
+                    if(!break_another_mode){
+                        pustData = new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                // TODO Auto-generated method stub
+                                //pushRealData(1);
+                                pushRealData_inSmartPhone();
+                            }
+                        });
+                        pustData.start();
+                        real_STATE.setVisibility(View.VISIBLE);
+                        realTimeTest= true;
+                        real_test.setText("실시간 테스트 종료");
+                    }
+                }
+                else{
+                    if(!break_another_mode){
+                        realTimeTest = false;
+                        real_test.setText("실시간 데이터 테스트!");
+                        pustData = new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                               // pushRealData(0);
+                            }
+                        });
+                        pustData.start();
+                        real_STATE.setVisibility(View.INVISIBLE);
+                        realTimeTest = false;
+                        real_test.setText("실시간 데이터 테스트!");
+                    }
                 }
                 break;
             case R.id.start_activity:
                 if(!break_another_mode){
-                    if(set_mode != 0){
-                        getActivityState = new Thread(new Runnable() {
-                            @Override
-                            public void run() {
-                                // TODO Auto-generated method stub
-                                checkState();
-                            }
-                        });
-                        getActivityState.start();
+                    if(!realTimeTest) {
+                        if (set_mode != 0) {
+                            getActivityState = new Thread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    // TODO Auto-generated method stub
+                                    checkState();
 
-                        break_another_mode = true;
-                        start_Btn.setText("데이터 수집 중지 (클릭)");
-                    }
-                    else{
-                        Toast.makeText(getApplicationContext(),"모드설정이 되어있지 않습니다. ",Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                            getActivityState.start();
+                            break_another_mode = true;
+                            start_Btn.setText("데이터 수집 중지 (클릭)");
+                        } else {
+                            Toast.makeText(getApplicationContext(), "모드설정이 되어있지 않습니다. ", Toast.LENGTH_SHORT).show();
+                        }
                     }
                 }
                 else{
-                    break_another_mode = false;
-                    set_mode = 0;
-                    start_Btn.setText("데이터 수집 시작!");
-                    state.setText("수집모드 : 대기중");
-                    vari_Pressure = 0;
-                    pre_avgPressure = 0;
-                    Toast.makeText(getApplicationContext(),"데이터 수집을 종료합니다. ",Toast.LENGTH_SHORT).show();
+                    if(!realTimeTest) {
+                        break_another_mode = false;
+                        set_mode = 0;
+                        start_Btn.setText("데이터 수집 시작!");
+                        state.setText("수집모드 : 대기중");
+                        vari_Pressure = 0;
+                        pre_avgPressure = 0;
+                        Toast.makeText(getApplicationContext(), "데이터 수집을 종료합니다. ", Toast.LENGTH_SHORT).show();
+                    }
                 }
 
 
@@ -280,7 +355,122 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         }
     }
+    public void pushRealData_inSmartPhone(){
+        int ST;
+        while (true) {
+            if (realTimeTest) {
+                if(vari_Pressure > 0)
+                    ST = ML.checkState(RX,RY,RZ,RGX,RGY,RGZ, (double)((vari_Pressure * 100) * (vari_Pressure * 100)) );
+                else
+                    ST = ML.checkState(RX,RY,RZ,RGX,RGY,RGZ, (double)( (-1)*(vari_Pressure * 100) * (vari_Pressure * 100)) );
+                if(ST == 0){
+                    runOnUiThread(new Runnable() {
+                        public void run() {
+                            // 메시지 큐에 저장될 메시지의 내용
+                            real_STATE.setText("실시간 상태 : 걷기");
+                        }
+                    });
+                }
+                else if(ST == 1){
+                    runOnUiThread(new Runnable() {
+                        public void run() {
+                            // 메시지 큐에 저장될 메시지의 내용
+                            real_STATE.setText("실시간 상태 : 달리기");
+                        }
+                    });
+                }
+                else if(ST == 2){
+                    runOnUiThread(new Runnable() {
+                        public void run() {
+                            // 메시지 큐에 저장될 메시지의 내용
+                            real_STATE.setText("실시간 상태 : 앉기");
+                        }
+                    });
+                }
+                else if(ST == 3){
+                    runOnUiThread(new Runnable() {
+                        public void run() {
+                            // 메시지 큐에 저장될 메시지의 내용
+                            real_STATE.setText("실시간 상태 : 눕기");
+                        }
+                    });
 
+                }
+
+                try {
+                    Thread.sleep(4000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+    public void pushRealData(int state){
+        Log.e("pass 1", "connection pushdata "+ state);
+        if(state == 0){
+            try {
+                Thread.sleep(4000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+
+            ArrayList<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
+            nameValuePairs.add(new BasicNameValuePair("txX", RX));
+            nameValuePairs.add(new BasicNameValuePair("txY", RY));
+            nameValuePairs.add(new BasicNameValuePair("txZ", RZ));
+            nameValuePairs.add(new BasicNameValuePair("txGX", RGX));
+            nameValuePairs.add(new BasicNameValuePair("txGY", RGY));
+            nameValuePairs.add(new BasicNameValuePair("txGZ", RGZ));
+            nameValuePairs.add(new BasicNameValuePair("state", state + ""));
+            nameValuePairs.add(new BasicNameValuePair("press", "" + (vari_Pressure * 100) * (vari_Pressure * 100)));
+            try {
+                HttpClient httpclient = new DefaultHttpClient();
+                HttpPost httppost = new HttpPost(url2);
+                httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs, "UTF-8"));
+                HttpResponse response = httpclient.execute(httppost);
+                Log.e("pass 1", "connection success ");
+            } catch (Exception e) {
+                Log.e("Fail 1", e.toString());
+
+            }
+        }
+        else {
+
+            Log.e("pass 1", "connection else ");
+            while (true) {
+                if (realTimeTest) {
+                    ArrayList<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
+                    nameValuePairs.add(new BasicNameValuePair("txX", RX));
+                    nameValuePairs.add(new BasicNameValuePair("txY", RY));
+                    nameValuePairs.add(new BasicNameValuePair("txZ", RZ));
+                    nameValuePairs.add(new BasicNameValuePair("txGX", RGX));
+                    nameValuePairs.add(new BasicNameValuePair("txGY", RGY));
+                    nameValuePairs.add(new BasicNameValuePair("txGZ", RGZ));
+                    nameValuePairs.add(new BasicNameValuePair("state", state + ""));
+                    nameValuePairs.add(new BasicNameValuePair("press", "" + (vari_Pressure * 100) * (vari_Pressure * 100)));
+
+                    Log.i("TAG", "2: ");
+                    try {
+                        HttpClient httpclient = new DefaultHttpClient();
+                        HttpPost httppost = new HttpPost(url2);
+                        httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs, "UTF-8"));
+                        HttpResponse response = httpclient.execute(httppost);
+                        Log.e("pass 1", "connection success ");
+                    } catch (Exception e) {
+                        Log.e("Fail 1", e.toString());
+
+                    }
+                }
+
+                try {
+                    Thread.sleep(1200);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
 
     void checkState(){
         try {
